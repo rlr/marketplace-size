@@ -45,9 +45,11 @@ class MainHandler(BaseHandler):
         if domain not in urls:
             return
 
-        ctx = {'entries': Entry.all().filter('domain =', urls[domain])
-                                     .order('-time')
-                                     .run(limit=672)}  # Two weeks of data
+        # Two weeks of data.
+        ctx = {'entries': reversed(Entry.all()
+                                        .filter('domain =', urls[domain])
+                                        .order('-time')
+                                        .run(limit=672))}
         self.render_template("homepage.html", **ctx)
 
 
