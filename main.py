@@ -47,7 +47,7 @@ class MainHandler(BaseHandler):
 
         ctx = {'entries': Entry.all().filter('domain =', urls[domain])
                                      .order('-time')
-                                     .count(672)}  # Two weeks of data
+                                     .run(limit=672)}  # Two weeks of data
         self.render_template("homepage.html", **ctx)
 
 
