@@ -46,10 +46,10 @@ class MainHandler(BaseHandler):
             return
 
         # Two weeks of data.
-        ctx = {'entries': reversed(Entry.all()
-                                        .filter('domain =', urls[domain])
-                                        .order('-time')
-                                        .run(limit=672))}
+        ctx = {'entries': reversed(
+                   list(Entry.all().filter('domain =', urls[domain])
+                                   .order('-time')
+                                   .run(limit=672)))}
         self.render_template("homepage.html", **ctx)
 
 
