@@ -51,7 +51,7 @@ def get_recent_data(domain):
         data = list(Entry.all().filter('domain =', urls[domain])
                                .order('-time')
                                .run(limit=600))
-        memcache.add(key, pickle.dumps(data), time=3600 * 1.5)
+        memcache.add(key, pickle.dumps(data), time=1800)
         return data
 
 
@@ -72,6 +72,8 @@ class CheckHandler(webapp2.RequestHandler):
 
     def _test_url(self, url):
         self.response.write('%s<br>' % url)
+        rev = urlfetch.fetch('%s/media/git-rev.txt' % url).content.strip()
+
         resp = urlfetch.fetch('%s?mobile=true' % url)
         self.response.write('Status Code: %d<br>' % resp.status_code)
         if resp.status_code != 200:
@@ -79,6 +81,8 @@ class CheckHandler(webapp2.RequestHandler):
 
         size = len(resp.content)
         asset_size = 0
+        css_size = 0
+        js_size = 0
 
         for asset in (m.group(2) for m in
                       asset_url_pattern.finditer(resp.content)):
@@ -87,8 +91,7 @@ class CheckHandler(webapp2.RequestHandler):
             if '://' not in asset:
                 asset = url + asset
 
-            if ('.js?' in asset or
-                '.css' in asset or
+            if ('.js?' in asset or '.css' in asset or
                 asset.endswith('.js')):
 
                 self.response.write('%s<br>' % asset)
@@ -97,12 +100,16 @@ class CheckHandler(webapp2.RequestHandler):
                 except Exception:
                     continue
                 if data:
-                    asset_size += len(data)
+                    data_len = len(data)
+                    if '.js?' in asset:
+                        js_size += data_len
+                    elif '.css' in asset:
+                        css_size += data_len
+                    asset_size += data_len
 
-        entry = Entry(time=datetime.datetime.now(),
-                      size=size,
-                      domain=url,
-                      with_assets=size + asset_size)
+        entry = Entry(time=datetime.datetime.now(), size=size,
+                      domain=url, with_assets=size + asset_size,
+                      commit=rev, size_css=css_size, size_js=js_size)
         entry.put()
         self.response.write('Size: %d<br>' % size)
         self.response.write('Assets Size: %d<br>' % asset_size)
@@ -116,7 +123,8 @@ class CheckHandler(webapp2.RequestHandler):
 
         memcache.add('last_cron', now)
 
-        map(self._test_url, urls.values())
+        for url in urls.values():
+            self._test_url(url)
 
 
 app = webapp2.WSGIApplication([

@@ -20,17 +20,27 @@
     var data = new google.visualization.DataTable();
     data.addColumn('date', 'Timestamp');
     data.addColumn('number', 'Page Size');
-    data.addColumn('number', 'w/CSS and JS');
+    data.addColumn('number', 'Combined');
+    data.addColumn('number', 'CSS');
+    data.addColumn('number', 'JS');
+    data.addColumn({type:'string', role:'annotation'});
+    data.addColumn({type:'string', role:'annotationText'});
     data.addRows([
+      {% set last_commit = None %}
       {% for entry in entries -%}
       [new Date({{ entry.time.year }},
-                {{- entry.time.month }},
+                {{- (entry.time.month - 1) }},
                 {{- entry.time.day }},
-                {{- entry.time.hour }},
-                {{- entry.time.minute }},
-                {{- entry.time.second }}),
+                {{- (entry.time.hour - 1) }},
+                {{- (entry.time.minute - 1) }},
+                {{- (entry.time.second - 1) }}),
        {{- entry.size }},
-       {{- entry.with_assets }}]{{ ',' if not loop.last }}
+       {{- entry.with_assets }},
+       {{- entry.size_css or 0 }},
+       {{- entry.size_js or 0 }},
+       {{ '"*"'|safe if entry.commit != last_commit else 'null' }},
+       {{ '"%s"'|safe % entry.commit if entry.commit != last_commit else 'null' }}]{{ ',' if not loop.last }}
+       {% set last_commit = entry.commit %}
       {%- endfor %}
     ]);
 

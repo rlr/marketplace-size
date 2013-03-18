@@ -1,5 +1,5 @@
 application: marketplace-size
-version: 1c
+version: 1f
 runtime: python27
 api_version: 1
 threadsafe: yes

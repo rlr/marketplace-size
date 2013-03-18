@@ -6,3 +6,6 @@ class Entry(db.Model):
     size = db.IntegerProperty(required=True)
     domain = db.StringProperty(required=True)
     with_assets = db.IntegerProperty(required=True)
+    size_css = db.IntegerProperty(required=False)
+    size_js = db.IntegerProperty(required=False)
+    commit = db.StringProperty(required=False)
