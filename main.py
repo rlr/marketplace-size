@@ -28,7 +28,7 @@ from models.entry import Entry
 asset_url_pattern = re.compile(r'(src|href)="(.*)"')
 
 urls = {'dev': 'https://marketplace-dev.allizom.org',
-        'prod': 'https://marketplace.firefox.com'}
+        'prod': 'https://support.mozilla.org'}
 
 
 class BaseHandler(webapp2.RequestHandler):
