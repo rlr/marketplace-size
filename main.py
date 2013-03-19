@@ -27,7 +27,7 @@ from models.entry import Entry
 
 asset_url_pattern = re.compile(r'(src|href)="(.*)"')
 
-urls = {'dev': 'https://marketplace-dev.allizom.org',
+urls = {'dev': 'https://support-dev.allizom.org',
         'prod': 'https://support.mozilla.org'}
 
 
@@ -72,10 +72,11 @@ class CheckHandler(webapp2.RequestHandler):
 
     def _test_url(self, url):
         self.response.write('%s<br>' % url)
-        rev = urlfetch.fetch('%s/media/git-rev.txt' % url).content.strip()
+        resp = urlfetch.fetch('%s/media/revision.txt' % url)
+        assert resp.status_code == 200
+        rev = resp.content.strip()
 
         resp = urlfetch.fetch('%s?mobile=true' % url)
-        self.response.write('Status Code: %d<br>' % resp.status_code)
         if resp.status_code != 200:
             return
 
@@ -112,7 +113,8 @@ class CheckHandler(webapp2.RequestHandler):
                       commit=rev, size_css=css_size, size_js=js_size)
         entry.put()
         self.response.write('Size: %d<br>' % size)
-        self.response.write('Assets Size: %d<br>' % asset_size)
+        self.response.write('Assets Size: %d ' % asset_size)
+        self.response.write('(CSS: %d, JS: %d)<br>' % (css_size, js_size))
 
     def get(self):
         now = time.time()

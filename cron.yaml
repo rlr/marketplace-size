@@ -1,4 +1,4 @@
 cron:
-- description: check marketplace size
+- description: check SUMO size
   url: /tasks/check
-  schedule: every 30 minutes
+  schedule: every 5 minutes
