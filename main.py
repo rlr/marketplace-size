@@ -102,7 +102,7 @@ class CheckHandler(webapp2.RequestHandler):
                     continue
                 if data:
                     data_len = len(data)
-                    if '.js?' in asset:
+                    if '.js?' in asset or asset.endswith('.js'):
                         js_size += data_len
                     elif '.css' in asset:
                         css_size += data_len
